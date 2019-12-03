@@ -38,7 +38,7 @@ Rules.
 {IDENTIFIER}                         : {token, {identifier, TokenLine, TokenChars}}.
 {QUOTED}                             : {token, {quoted, TokenLine, remove_wrapper(TokenChars)}}.
 {SYMBOL}                             : {token, {TokenChars, TokenLine}}.
-#{IDENTIFIER}                        : {token, {hash, TokenLine, tail(TokenChars)}}.
+#{IDENTIFIER}                        : {token, {id, TokenLine, tail(TokenChars)}}.
 \.{IDENTIFIER}                       : {token, {class, TokenLine, tail(TokenChars)}}.
 \:{NOT}\(                            : {token, {pseudo_not, TokenLine}}.
 \:{IDENTIFIER}                       : {token, {pseudo, TokenLine, tail(TokenChars)}}.
@@ -47,19 +47,19 @@ Rules.
 \({EVEN}\)                           : {token, {pseudo_class_even, TokenLine}}.
 \({PSEUDO_PATTERN}\)                 : {token, {pseudo_class_pattern, TokenLine, remove_wrapper(TokenChars)}}.
 \({QUOTED}\)                         : {token, {pseudo_class_quoted, TokenLine, remove_wrapper(remove_wrapper(TokenChars))}}.
-{W}*\)                               : {token, {close_parentesis, TokenLine}}.
+{W}*\)                               : {token, {close_parentheses, TokenLine}}.
 ~=                                   : {token, {includes, TokenLine}}.
 \|=                                  : {token, {dash_match, TokenLine}}.
 \^=                                  : {token, {prefix_match, TokenLine}}.
 \$=                                  : {token, {suffix_match, TokenLine}}.
 \*=                                  : {token, {substring_match, TokenLine}}.
-=                                    : {token, {equal, TokenLine}}.
-{W}*,{W}*                            : {token, {comma, TokenLine}}.
-{W}*>{W}*                            : {token, {greater, TokenLine}}.
-{W}*\+{W}*                           : {token, {plus, TokenLine}}.
-{W}*~{W}*                            : {token, {tilde, TokenLine}}.
-{W}*\|{W}*                           : {token, {namespace_pipe, TokenLine}}.
-{W}+                                 : {token, {space, TokenLine}}.
+=                                    : {token, {'=', TokenLine}}.
+{W}*,{W}*                            : {token, {',', TokenLine}}.
+{W}*>{W}*                            : {token, {'>', TokenLine}}.
+{W}*\+{W}*                           : {token, {'+', TokenLine}}.
+{W}*~{W}*                            : {token, {'~', TokenLine}}.
+{W}*\|{W}*                           : {token, {'|', TokenLine}}.
+{W}+                                 : {token, {' ', TokenLine}}.
 .                                    : {token, {unknown, TokenLine, TokenChars}}.
 
 Erlang code.
