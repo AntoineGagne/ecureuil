@@ -24,6 +24,7 @@ Definitions.
 
 IDENTIFIER = [-A-Za-z0-9_]+
 QUOTED = (\"[^"]*\"|\'[^']*\')
+WILDCARD = \*
 PARENTESIS = \([^)]*\)
 INTEGER = [0-9]+
 NOT = (n|N)(o|O)(t|T)
@@ -36,6 +37,7 @@ W = [\s\t\r\n\f]
 Rules.
 
 {IDENTIFIER}                         : {token, {identifier, TokenLine, TokenChars}}.
+{WILDCARD}                           : {token, {all, TokenLine}}.
 {QUOTED}                             : {token, {quoted, TokenLine, remove_wrapper(TokenChars)}}.
 {SYMBOL}                             : {token, {TokenChars, TokenLine}}.
 #{IDENTIFIER}                        : {token, {id, TokenLine, tail(TokenChars)}}.
