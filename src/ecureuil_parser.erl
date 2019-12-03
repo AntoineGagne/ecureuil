@@ -19,8 +19,10 @@ parse(Raw) ->
 
 try_parse(Raw) ->
     case ecureuil_lexer:string(Raw) of
-        {ok, Tokens, _} -> ecureuil_generated_parser:parse(Tokens);
-        Error -> Error
+        {ok, Tokens, _} ->
+            ecureuil_generated_parser:parse(Tokens);
+        Error ->
+            Error
     end.
 
 flatten(Value) ->
