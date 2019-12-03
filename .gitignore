@@ -99,5 +99,5 @@ tags
 ### Custom
 .envrc
 src/ecureuil_lexer.erl
-src/ecureuil_parser.erl
+src/ecureuil_generated_parser.erl
 *.html
