@@ -1,17 +1,14 @@
 -module(ecureuil_parser).
 
 %% API
--export([]).
+-export([parse/1]).
 
 %%%===================================================================
 %%% API
 %%%===================================================================
 
 parse(Raw) ->
-    case try_parse(Raw) of
-        {ok, Tree} -> {ok, flatten(Tree)};
-        Error -> Error
-    end.
+    try_parse(Raw).
 
 %%%===================================================================
 %%% Internal functions
@@ -24,6 +21,3 @@ try_parse(Raw) ->
         Error ->
             Error
     end.
-
-flatten(Value) ->
-    Value.
