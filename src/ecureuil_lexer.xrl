@@ -32,7 +32,7 @@ ODD = (o|O)(d|D)(d|D)
 EVEN = (e|E)(v|V)(e|E)(n|N)
 PSEUDO_PATTERN = (\+|-)?({INTEGER})?(n|N)((\+|-){INTEGER})?
 SYMBOL = [\[\]*]
-W = [\s\t\r\n\f]
+WHITESPACES = [\s\t\r\n\f]
 
 Rules.
 
@@ -56,12 +56,12 @@ Rules.
 \$=                                  : {token, {suffix_match, TokenLine}}.
 \*=                                  : {token, {substring_match, TokenLine}}.
 =                                    : {token, {'=', TokenLine}}.
-{W}*,{W}*                            : {token, {',', TokenLine}}.
-{W}*>{W}*                            : {token, {'>', TokenLine}}.
-{W}*\+{W}*                           : {token, {'+', TokenLine}}.
-{W}*~{W}*                            : {token, {'~', TokenLine}}.
-{W}*\|{W}*                           : {token, {'|', TokenLine}}.
-{W}+                                 : {token, {' ', TokenLine}}.
+{WHITESPACES}*,{WHITESPACES}*        : {token, {',', TokenLine}}.
+{WHITESPACES}*>{WHITESPACES}*        : {token, {'>', TokenLine}}.
+{WHITESPACES}*\+{WHITESPACES}*       : {token, {'+', TokenLine}}.
+{WHITESPACES}*~{WHITESPACES}*        : {token, {'~', TokenLine}}.
+{WHITESPACES}*\|{WHITESPACES}*       : {token, {'|', TokenLine}}.
+{WHITESPACES}+                       : {token, {' ', TokenLine}}.
 .                                    : {token, {unknown, TokenLine, TokenChars}}.
 
 Erlang code.

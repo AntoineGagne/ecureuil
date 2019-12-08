@@ -21,7 +21,7 @@ selector -> pseudo_not selector close_parentheses : {is_not, '$2'}.
 selector -> pseudo pseudo_class_integer : {to_atom('$1'), extract_token('$2')}.
 
 selector -> all : all.
-selector -> identifier : extract_token('$1').
+selector -> identifier : {identifier, to_binary('$1')}.
 selector -> identifier id : {has_id, to_binary('$1'), to_binary('$2')}.
 selector -> identifier class : {has_class, to_binary('$1'), to_binary('$2')}.
 selector -> class : {has_class, to_binary('$1')}.
