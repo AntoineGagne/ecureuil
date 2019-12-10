@@ -10,7 +10,9 @@
 
 -type attribute() :: {binary(), binary()}.
 -type html_node() :: {binary(), [attribute()], [html_node() | binary()]}.
--opaque html() :: html_node().
+-opaque html() :: #{tree := html_node(),
+                    by_ids := #{},
+                    by_identifiers := #{}}.
 
 %%%===================================================================
 %%% API
@@ -19,10 +21,16 @@
 -spec parse(binary() | string()) -> {ok, html()} | {error, term()}.
 parse(Raw) ->
     try
-        {ok, mochiweb_html:parse(Raw)}
+        Parsed = mochiweb_html:parse(Raw),
+        Indices = build_index(Parsed),
+        {ok, Indices}
     catch
         E:R -> {error, {E, R}}
     end.
+
+-spec tree(html()) -> html_node().
+tree(#{tree := Tree}) ->
+    Tree.
 
 -spec attribute(html_node(), string() | binary()) -> {ok, binary()} | {error, term()}.
 attribute(Node, Attribute) when is_list(Attribute) ->
@@ -37,3 +45,27 @@ attribute({_, Attributes, _}, Attribute) ->
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
+
+build_index(Parsed) ->
+    {_, ByIds} = build_tree_by_indices({0, #{}}, Parsed),
+    ByIdentifiers = build_tree_by_identifiers(ByIds),
+    #{tree => Parsed, by_ids => ByIds, by_identifiers => ByIdentifiers}.
+
+build_tree_by_indices({Start, Index}, {Identifier, Attributes, Children}) ->
+    Build = fun (Node, {I, Acc}) ->
+                    build_tree_by_indices({I, Acc}, Node)
+            end,
+    {Start2, Index2} = lists:foldl(Build, {Start + 1, Index}, Children),
+    Index3 = Index2#{Start => {Identifier, Attributes, lists:seq(Start + 1, Start2 - 1)}},
+    {Start2, Index3};
+build_tree_by_indices({Start, Index}, Leaf) ->
+    {Start + 1, Index#{Start => Leaf}}.
+
+build_tree_by_identifiers(ByIds) ->
+    U = fun (K, {Identifier, _, _}, A) ->
+                Update = fun (Keys) -> [K | Keys] end,
+                maps:update_with(Identifier, Update, [K], A);
+            (_, _, A) ->
+                A
+        end,
+    maps:fold(U, #{}, ByIds).
