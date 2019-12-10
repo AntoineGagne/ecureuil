@@ -16,16 +16,17 @@ selector -> selector '>' selector : {is_child, '$1', '$3'}.
 selector -> selector '~' selector : {is_sibling, '$1', '$3'}.
 selector -> selector '+' selector : {is_adjacent_sibling, '$1', '$3'}.
 selector -> selector ' ' selector : {is_descendant, '$1', '$3'}.
-selector -> identifier pseudo_not selector close_parentheses : {is_not, to_binary('$1'), '$3'}.
-selector -> pseudo_not selector close_parentheses : {is_not, '$2'}.
+selector -> identifier pseudo_not selector close_parentheses :
+            {is_not, {identifier, to_binary('$1')}, {'not', '$3'}}.
+selector -> pseudo_not selector close_parentheses : {is_not, {'not', '$2'}}.
 selector -> pseudo pseudo_class_integer : {to_atom('$1'), extract_token('$2')}.
 
 selector -> all : all.
 selector -> identifier : {identifier, to_binary('$1')}.
-selector -> identifier id : {has_id, to_binary('$1'), to_binary('$2')}.
-selector -> identifier class : {has_class, to_binary('$1'), to_binary('$2')}.
-selector -> class : {has_class, to_binary('$1')}.
-selector -> id : {has_id, to_binary('$1')}.
+selector -> identifier id : {has_id, {identifier, to_binary('$1')}, {id, to_binary('$2')}}.
+selector -> identifier class : {has_class, {identifier, to_binary('$1')}, {class, to_binary('$2')}}.
+selector -> class : {class, to_binary('$1')}.
+selector -> id : {id, to_binary('$1')}.
 
 Erlang code.
 
