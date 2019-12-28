@@ -2,6 +2,7 @@
 
 %% API
 -export([parse/1,
+         tree/1,
          attribute/2]).
 
 -export_type([html/0,
@@ -47,19 +48,36 @@ attribute({_, Attributes, _}, Attribute) ->
 %%%===================================================================
 
 build_index(Parsed) ->
-    {_, ByIds} = build_tree_by_indices({0, #{}}, Parsed),
+    ByIds = build_tree_by_indices(Parsed),
     ByIdentifiers = build_tree_by_identifiers(ByIds),
     #{tree => Parsed, by_ids => ByIds, by_identifiers => ByIdentifiers}.
+    %{_, ByIds} = build_tree_by_indices2({0, []}, Parsed),
+    %#{tree => Parsed, by_ids => maps:from_list(ByIds)}.
 
-build_tree_by_indices({Start, Index}, {Identifier, Attributes, Children}) ->
+build_tree_by_indices(Parsed) ->
+    {_, ByIds} = do_build_tree_by_indices2({0, []}, Parsed),
+    ByIds.
+
+do_build_tree_by_indices2({Start, Index}, {Identifier, Attributes, Children}) ->
     Build = fun (Node, {I, Acc}) ->
-                    build_tree_by_indices({I, Acc}, Node)
+                    do_build_tree_by_indices2({I, Acc}, Node)
             end,
-    {Start2, Index2} = lists:foldl(Build, {Start + 1, Index}, Children),
-    Index3 = Index2#{Start => {Identifier, Attributes, lists:seq(Start + 1, Start2 - 1)}},
-    {Start2, Index3};
-build_tree_by_indices({Start, Index}, Leaf) ->
-    {Start + 1, Index#{Start => Leaf}}.
+    {Start2, Index2} = lists:foldl(Build, {Start + 1, []}, Children),
+    ChildrenIndices = lists:map(fun ({I, _}) -> I end, Index2),
+    Index3 = [{Start, {Identifier, Attributes, ChildrenIndices}} | Index],
+    {Start2, Index3 ++ Index2};
+do_build_tree_by_indices2({Start, Index}, Leaf) ->
+    {Start + 1, [{Start, Leaf} | Index]}.
+
+% do_build_tree_by_indices({Start, Index}, {Identifier, Attributes, Children}) ->
+%     Build = fun (Node, {I, Acc}) ->
+%                     do_build_tree_by_indices({I, Acc}, Node)
+%             end,
+%     {Start2, Index2} = lists:foldl(Build, {Start + 1, Index}, Children),
+%     Index3 = Index2#{Start => {Identifier, Attributes, lists:seq(Start + 1, Start2 - 1)}},
+%     {Start2, Index3};
+% do_build_tree_by_indices({Start, Index}, Leaf) ->
+%     {Start + 1, Index#{Start => Leaf}}.
 
 build_tree_by_identifiers(ByIds) ->
     U = fun (K, {Identifier, _, _}, A) ->
