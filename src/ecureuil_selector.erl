@@ -2,7 +2,8 @@
 
 %% API
 -export([parse/1,
-         find/2]).
+         find/2
+        ]).
 
 -export_type([selector/0]).
 
@@ -41,7 +42,8 @@ parse(Raw) ->
     Trimmed = string:trim(Raw, both),
     try_parse(Trimmed).
 
-find(Html, Selector) ->
+-spec find(selector(), ecureuil_html:html()) -> {ok, [ecureuil_html:html_node()]} | {error, term()}.
+find(Selector, Html) ->
     try_find(Selector, Html).
 
 %%%===================================================================
@@ -60,4 +62,89 @@ try_parse(Raw) ->
     end.
 
 try_find(Selector, Html) ->
-    {ok, []}.
+    case build_matcher(Selector) of
+        Error={error, _} -> Error;
+        Matcher ->
+            Indices = Matcher(Html),
+            ExtractNodes = fun (Index) ->
+                                   {ok, Node} = ecureuil_html:index(Index, Html),
+                                   Node
+                           end,
+            {ok, lists:map(ExtractNodes, Indices)}
+    end.
+
+build_matcher(all) ->
+    fun all/1;
+build_matcher({identifier, Identifier}) ->
+    identifier(Identifier);
+build_matcher({id, Id}) ->
+    id(Id);
+build_matcher({class, Class}) ->
+    class(Class);
+build_matcher({has_id, Identifier, Id}) ->
+    IdentifierMatcher = build_matcher(Identifier),
+    Matcher = build_matcher(Id),
+    combine_and(IdentifierMatcher, Matcher);
+build_matcher({has_class, Identifier, Class}) ->
+    IdentifierMatcher = build_matcher(Identifier),
+    Matcher = build_matcher(Class),
+    combine_and(IdentifierMatcher, Matcher);
+build_matcher({match, M1, M2}) ->
+    Matcher1 = build_matcher(M1),
+    Matcher2 = build_matcher(M2),
+    combine_or(Matcher1, Matcher2);
+build_matcher(Invalid={is_child, _Parent, _Child}) ->
+    {error, {not_implemented, Invalid}};
+build_matcher(Invalid={is_sibling, _S1, _S2}) ->
+    {error, {not_implemented, Invalid}};
+build_matcher(Invalid={is_adjacent_sibling, _S1, _S2}) ->
+    {error, {not_implemented, Invalid}};
+build_matcher(Invalid={is_descendant, _Ancestor, _Descendant}) ->
+    {error, {not_implemented, Invalid}};
+build_matcher({is_not, Identifier, Clause}) ->
+    IdentifierMatcher = build_matcher(Identifier),
+    Matcher = build_matcher(Clause),
+    combine_not(IdentifierMatcher, Matcher);
+build_matcher({is_not, Clause}) ->
+    Matcher = build_matcher(Clause),
+    combine_not(fun all/1, Matcher);
+build_matcher(Invalid={nth_child, _Amount}) ->
+    {error, {not_implemented, Invalid}};
+build_matcher(Invalid) ->
+    {error, {unknown, Invalid}}.
+
+combine_not(Matcher1, Matcher2) ->
+    fun (Index) ->
+            Matched1 = sets:from_list(Matcher1(Index)),
+            Matched2 = sets:from_list(Matcher2(Index)),
+            Combined = sets:subtract(Matched1, Matched2),
+            sets:to_list(Combined)
+    end.
+
+combine_and(Matcher1, Matcher2) ->
+    fun (Index) ->
+            Matched1 = sets:from_list(Matcher1(Index)),
+            Matched2 = sets:from_list(Matcher2(Index)),
+            Combined = sets:intersection(Matched1, Matched2),
+            sets:to_list(Combined)
+    end.
+
+combine_or(Matcher1, Matcher2) ->
+    fun (Index) ->
+            Matched1 = sets:from_list(Matcher1(Index)),
+            Matched2 = sets:from_list(Matcher2(Index)),
+            Combined = sets:union(Matched1, Matched2),
+            sets:to_list(Combined)
+    end.
+
+all(Index) ->
+    ecureuil_html:all(Index).
+
+id(Id) ->
+    fun (Index) -> ecureuil_html:id(Id, Index) end.
+
+class(Class) ->
+    fun (Index) -> ecureuil_html:class(Class, Index) end.
+
+identifier(Identifier) ->
+    fun (Index) -> ecureuil_html:identifier(Identifier, Index) end.

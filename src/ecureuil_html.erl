@@ -2,6 +2,7 @@
 
 %% API
 -export([parse/1,
+         all/1,
          index/2,
          id/2,
          class/2,
@@ -60,6 +61,10 @@ index(Index, #{by_indices := ByIndices}) ->
         {ok, Node} -> {ok, Node};
         error -> {error, {not_found, Index}}
     end.
+
+-spec all(html()) -> [index()].
+all(#{by_indices := ByIndices}) ->
+    maps:keys(ByIndices).
 
 -spec class(string() | binary(), html()) -> [index()].
 class(Raw, Index) when is_list(Raw) ->
