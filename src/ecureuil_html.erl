@@ -2,7 +2,6 @@
 
 %% API
 -export([parse/1,
-         tree/1,
          attribute/2]).
 
 -export_type([html/0,
@@ -10,19 +9,17 @@
               attribute/0]).
 
 -type attribute() :: {binary(), binary()}.
--type html_node() :: {binary(), [attribute()], [html_node() | binary()]}.
-
+-type html_node() :: {binary(), [attribute()], [index()]}.
 -type id() :: binary().
 -type class() :: binary().
 -type index() :: non_neg_integer().
 -type html_identifier() :: binary().
 -type by_ids() :: #{id() := [index()]}.
 -type by_classes() :: #{class() := [index()]}.
--type by_indices() :: #{index() := {binary(), [attribute()], [index()]} | binary()}.
+-type by_indices() :: #{index() := html_node()}.
 -type by_identifiers() :: #{html_identifier() := [index()]}.
 
--opaque html() :: #{tree := html_node(),
-                    by_ids := by_ids(),
+-opaque html() :: #{by_ids := by_ids(),
                     by_classes := by_classes(),
                     by_indices := by_indices(),
                     by_identifiers := by_identifiers()}.
@@ -40,10 +37,6 @@ parse(Raw) ->
     catch
         E:R:S -> {error, {E, R, S}}
     end.
-
--spec tree(html()) -> html_node().
-tree(#{tree := Tree}) ->
-    Tree.
 
 -spec attribute(html_node(), string() | binary()) -> {ok, binary()} | {error, term()}.
 attribute(Node, Attribute) when is_list(Attribute) ->
@@ -64,8 +57,7 @@ build_index(Parsed) ->
     ByIdentifiers = build_tree_by_identifiers(ByIndices),
     ByClasses = build_tree_by_classes(ByIndices),
     ByIds = build_tree_by_ids(ByIndices),
-    #{tree => Parsed,
-      by_indices => ByIndices,
+    #{by_indices => ByIndices,
       by_identifiers => ByIdentifiers,
       by_ids => ByIds,
       by_classes => ByClasses}.
@@ -75,9 +67,7 @@ build_tree_by_indices(Parsed) ->
     maps:from_list(ByIndices).
 
 do_build_tree_by_indices({Start, Index}, {Identifier, Attributes, Children}) ->
-    Build = fun (Node, {I, Acc}) ->
-                    do_build_tree_by_indices({I, Acc}, Node)
-            end,
+    Build = fun (Node, {I, Acc}) -> do_build_tree_by_indices({I, Acc}, Node) end,
     {Start2, Index2} = lists:foldl(Build, {Start + 1, []}, Children),
     ChildrenIndices = lists:map(fun ({I, _}) -> I end, Index2),
     Index3 = [{Start, {Identifier, Attributes, ChildrenIndices}} | Index],
@@ -88,9 +78,7 @@ do_build_tree_by_indices({Start, Index}, Leaf) ->
 build_tree_by_identifiers(ByIds) ->
     U = fun (K, {Identifier, _, _}, A) ->
                 Update = fun (Keys) -> [K | Keys] end,
-                maps:update_with(Identifier, Update, [K], A);
-            (_, _, A) ->
-                A
+                maps:update_with(Identifier, Update, [K], A)
         end,
     maps:fold(U, #{}, ByIds).
 
