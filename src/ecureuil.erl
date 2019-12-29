@@ -1,3 +1,6 @@
+%% @author Antoine Gagné <gagnantoine@gmail.com>
+%% @copyright 2019 Antoine Gagné
+%% @doc Parse and navigate HTML with CSS selectors.
 -module(ecureuil).
 
 -ifdef(TEST).
@@ -16,6 +19,7 @@
 %%%===================================================================
 
 -spec find(binary() | string(), binary() | string()) -> {ok, [html_node()]} | {error, term()}.
+%% @doc Navigate the HTML with the selector and returns all the matching elements.
 find(RawSelector, RawHtml) ->
     MaybeHtml = ecureuil_html:parse(RawHtml),
     MaybeSelector = ecureuil_selector:parse(RawSelector),
