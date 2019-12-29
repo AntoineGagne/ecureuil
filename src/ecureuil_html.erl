@@ -2,6 +2,10 @@
 
 %% API
 -export([parse/1,
+         index/2,
+         id/2,
+         class/2,
+         identifier/2,
          attribute/2]).
 
 -export_type([html/0,
@@ -18,6 +22,8 @@
 -type by_classes() :: #{class() := [index()]}.
 -type by_indices() :: #{index() := html_node()}.
 -type by_identifiers() :: #{html_identifier() := [index()]}.
+
+-type not_found(Value) :: {error, {not_found, Value}}.
 
 -opaque html() :: #{by_ids := by_ids(),
                     by_classes := by_classes(),
@@ -48,6 +54,34 @@ attribute({_, Attributes, _}, Attribute) ->
         {_, Matched} -> {ok, Matched}
     end.
 
+-spec index(index(), html()) -> {ok, html_node()} | not_found(index()).
+index(Index, #{by_indices := ByIndices}) ->
+    case maps:find(Index, ByIndices) of
+        {ok, Node} -> {ok, Node};
+        error -> {error, {not_found, Index}}
+    end.
+
+-spec class(string() | binary(), html()) -> [index()].
+class(Raw, Index) when is_list(Raw) ->
+    Class = unicode:characters_to_binary(Raw),
+    class(Class, Index);
+class(Class, #{by_classes := ByClasses}) ->
+    maps:get(Class, ByClasses, []).
+
+-spec id(string() | binary(), html()) -> [index()].
+id(Raw, Index) when is_list(Raw) ->
+    Id = unicode:characters_to_binary(Raw),
+    id(Id, Index);
+id(Id, #{by_ids := ByIds}) ->
+    maps:get(Id, ByIds, []).
+
+-spec identifier(string() | binary(), html()) -> [index()].
+identifier(Raw, Index) when is_list(Raw) ->
+    Identifier = unicode:characters_to_binary(Raw),
+    identifier(Identifier, Index);
+identifier(Identifier, #{by_identifiers := ByIdentifiers}) ->
+    maps:get(Identifier, ByIdentifiers, []).
+
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
@@ -76,7 +110,8 @@ do_build_tree_by_indices({Start, Index}, Leaf) ->
     {Start + 1, [{Start, {Leaf, [], []}} | Index]}.
 
 build_tree_by_identifiers(ByIds) ->
-    U = fun (K, {Identifier, _, _}, A) ->
+    U = fun (K, {Raw, _, _}, A) ->
+                Identifier = unicode:characters_to_binary(Raw),
                 Update = fun (Keys) -> [K | Keys] end,
                 maps:update_with(Identifier, Update, [K], A)
         end,
@@ -105,7 +140,8 @@ classes(Node) ->
         {error, _} -> [];
         {ok, Raw} ->
             Trimmed = string:trim(Raw),
-            string:lexemes(Trimmed, [$\t, $ ])
+            Split = string:lexemes(Trimmed, [$\t, $ ]),
+            lists:map(fun unicode:characters_to_binary/1, Split)
     end.
 
 ids(Node) ->
@@ -113,5 +149,6 @@ ids(Node) ->
         {error, _} -> [];
         {ok, Raw} ->
             Trimmed = string:trim(Raw),
-            string:lexemes(Trimmed, [$\t, $ ])
+            Split = string:lexemes(Trimmed, [$\t, $ ]),
+            lists:map(fun unicode:characters_to_binary/1, Split)
     end.
