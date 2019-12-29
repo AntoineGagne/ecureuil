@@ -98,3 +98,6 @@ tags
 
 ### Custom
 .envrc
+src/ecureuil_lexer.erl
+src/ecureuil_parser.erl
+*.html

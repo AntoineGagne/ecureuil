@@ -2,6 +2,9 @@
 ecureuil
 ========
 
+.. image:: https://travis-ci.org/AntoineGagne/ecureuil.svg?branch=master
+    :target: https://travis-ci.org/AntoineGagne/ecureuil
+
 :Author: `Antoine Gagné <gagnantoine@gmail.com>`_
 
 .. contents::
