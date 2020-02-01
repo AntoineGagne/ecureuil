@@ -102,20 +102,20 @@ build_index(Parsed) ->
       by_classes => ByClasses}.
 
 
-% Puts an indice on each html elements
 build_tree_by_indices(Parsed) ->
-    {_, ByIndices} = do_build_tree_by_indices({0, []}, Parsed),
+    {_, _, ByIndices} = do_build_tree_by_indices({0, []}, Parsed),
     maps:from_list(ByIndices).
 
-do_build_tree_by_indices({0, []}, {Identifier, Attributes, Children}) ->
-    Build = fun (Node, {I, Acc}) -> do_build_tree_by_indices({I, Acc}, Node) end,
-    {NewIndice, Index} = lists:foldl(Build, {1, []}, Children),
-    ChildrenIndices = lists:map(fun ({I, _}) -> I end, Index),
-    {NewIndice, [{0, {Identifier, Attributes, ChildrenIndices}} | Index]};
-do_build_tree_by_indices({Start, Index}, {Identifier, Attributes, _Children}) ->
-    {Start + 1, [{Start, {Identifier, Attributes, []}} | Index]};
+do_build_tree_by_indices({Start, Index}, {Identifier, Attributes, Children}) ->
+    Build =
+        fun (Node, {I, ChildrenIndices, Acc}) ->
+                {NewI, ChildI, NewAcc} = do_build_tree_by_indices({I, Acc}, Node),
+                {NewI, [ChildI | ChildrenIndices], NewAcc}
+        end,
+    {NewIndice, ChildrenIndices, Index2} = lists:foldl(Build, {Start+1, [], Index}, Children),
+    {NewIndice, Start, [{Start, {Identifier, Attributes, ChildrenIndices}} | Index2]};
 do_build_tree_by_indices({Start, Index}, Leaf) ->
-    {Start + 1, [{Start, {Leaf, [], []}} | Index]}.
+    {Start + 1, Start, [{Start, {Leaf, [], []}} | Index]}.
 
 build_tree_by_identifiers(ByIds) ->
     U = fun (K, {Raw, _, _}, A) ->
