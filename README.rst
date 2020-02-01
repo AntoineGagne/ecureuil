@@ -8,6 +8,13 @@ ecureuil
 .. image:: http://img.shields.io/hexpm/v/ecureuil.svg?style=flat
     :target: https://hex.pm/packages/ecureuil
 
+.. image:: https://img.shields.io/github/release/AntoineGagne/ecureuil?color=brightgreen
+    :target: https://github.com/AntoineGagne/ecureuil/releases
+
+.. image:: https://coveralls.io/repos/github/AntoineGagne/ecureuil/badge.svg?branch=master
+    :target: https://coveralls.io/github/AntoineGagne/ecureuil?branch=master
+
+
 :Author: `Antoine Gagné <gagnantoine@gmail.com>`_
 
 .. contents::
