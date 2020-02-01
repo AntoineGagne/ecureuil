@@ -5,6 +5,9 @@ ecureuil
 .. image:: https://travis-ci.org/AntoineGagne/ecureuil.svg?branch=master
     :target: https://travis-ci.org/AntoineGagne/ecureuil
 
+.. image:: http://img.shields.io/hexpm/v/ecureuil.svg?style=flat
+    :target: https://hex.pm/packages/ecureuil
+
 :Author: `Antoine Gagné <gagnantoine@gmail.com>`_
 
 .. contents::
@@ -23,7 +26,7 @@ To install this library, simply add the following lines to your
 
 .. code-block:: erlang
 
-    {ecureuil, "1.0.0"}
+    {ecureuil, "1.0.1"}
 
 Development
 ===========
