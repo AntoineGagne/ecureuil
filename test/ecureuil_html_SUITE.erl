@@ -7,7 +7,7 @@
 -compile(export_all).
 
 -define(SOME_INVALID_HTML, <<"some invalid</">>).
--define(AN_ATTRIBUTE, <<"an attribute">>).
+-define(AN_ATTRIBUTE, "attribute").
 -define(SOME_VALID_HTML,
         <<"<a class=\"a b\" id=\"c\"><!- test !-><div class=\"a\" id=\"e\">Test</div></a>">>).
 -define(AN_EXISTING_ID, "c").
@@ -16,6 +16,7 @@
 -define(A_NON_EXISTING_NODE, 1000).
 -define(AN_EXISTING_NODE, 0).
 -define(A_COMMENT, {comment, <<" comment --!></div>">>}).
+-define(A_NODE, {<<"a">>, [{<<"attribute">>, <<"http://anurl.com">>}], [2, 1]}).
 
 all() ->
     [
@@ -25,7 +26,9 @@ all() ->
      can_fetch_nodes_with_matching_classes,
      can_fetch_nodes_with_matching_identifiers,
      return_error_on_unknown_node,
-     can_fetch_node
+     can_fetch_node,
+     return_error_when_fetching_attribute_from_comment,
+     can_fetch_attribute
     ].
 
 init_per_testcase(_Name, Config) ->
@@ -83,6 +86,12 @@ return_error_when_fetching_attribute_from_comment() ->
     [{doc, "Given an HTML comment, when fetching attribute, then returns an error."}].
 return_error_when_fetching_attribute_from_comment(_Config) ->
     ?assertMatch({error, _}, ecureuil_html:attribute(?A_COMMENT, ?AN_ATTRIBUTE)).
+
+can_fetch_attribute() ->
+    [{doc, "Given an HTML node with an attribute, when fetching attribute, "
+      "then returns the attribute."}].
+can_fetch_attribute(_Config) ->
+    ?assertMatch({ok, _}, ecureuil_html:attribute(?A_NODE, ?AN_ATTRIBUTE)).
 
 %%%===================================================================
 %%% Internal functions
