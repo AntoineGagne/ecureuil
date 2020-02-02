@@ -53,7 +53,9 @@ attribute({_, Attributes, _}, Attribute) ->
     case lists:keyfind(Attribute, 1, Attributes) of
         false -> {error, {not_found, Attribute}};
         {_, Matched} -> {ok, Matched}
-    end.
+    end;
+attribute({_, _}, Attribute) ->
+    {error, {not_found, Attribute}}.
 
 -spec index(index(), html()) -> {ok, html_node()} | not_found(index()).
 index(Index, #{by_indices := ByIndices}) ->
@@ -118,7 +120,9 @@ do_build_tree_by_indices({Start, Index}, Leaf) ->
     {Start + 1, Start, [{Start, {Leaf, [], []}} | Index]}.
 
 build_tree_by_identifiers(ByIds) ->
-    U = fun (K, {Raw, _, _}, A) ->
+    U = fun (_, {{comment, _}, _, _}, A) ->
+                A;
+            (K, {Raw, _, _}, A) ->
                 Identifier = unicode:characters_to_binary(Raw),
                 Update = fun (Keys) -> [K | Keys] end,
                 maps:update_with(Identifier, Update, [K], A)
