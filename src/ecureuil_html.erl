@@ -120,7 +120,9 @@ do_build_tree_by_indices({Start, Index}, Leaf) ->
     {Start + 1, Start, [{Start, {Leaf, [], []}} | Index]}.
 
 build_tree_by_identifiers(ByIds) ->
-    U = fun (K, {Raw, _, _}, A) ->
+    U = fun (_, {{comment, _}, _, _}, A) ->
+                A;
+            (K, {Raw, _, _}, A) ->
                 Identifier = unicode:characters_to_binary(Raw),
                 Update = fun (Keys) -> [K | Keys] end,
                 maps:update_with(Identifier, Update, [K], A)
