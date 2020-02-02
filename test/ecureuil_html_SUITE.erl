@@ -7,6 +7,7 @@
 -compile(export_all).
 
 -define(SOME_INVALID_HTML, <<"some invalid</">>).
+-define(AN_ATTRIBUTE, <<"an attribute">>).
 -define(SOME_VALID_HTML,
         <<"<a class=\"a b\" id=\"c\"><!- test !-><div class=\"a\" id=\"e\">Test</div></a>">>).
 -define(AN_EXISTING_ID, "c").
@@ -14,6 +15,7 @@
 -define(AN_EXISTING_IDENTIFIER, "a").
 -define(A_NON_EXISTING_NODE, 1000).
 -define(AN_EXISTING_NODE, 0).
+-define(A_COMMENT, {comment, <<" comment --!></div>">>}).
 
 all() ->
     [
@@ -76,6 +78,11 @@ can_fetch_node() ->
 can_fetch_node(_Config) ->
     {ok, Index} = ecureuil_html:parse(?SOME_VALID_HTML),
     ?assertMatch({ok, {_, _, _}}, ecureuil_html:index(?AN_EXISTING_NODE, Index)).
+
+return_error_when_fetching_attribute_from_comment() ->
+    [{doc, "Given an HTML comment, when fetching attribute, then returns an error."}].
+return_error_when_fetching_attribute_from_comment(_Config) ->
+    ?assertMatch({error, _}, ecureuil_html:attribute(?A_COMMENT, ?AN_ATTRIBUTE)).
 
 %%%===================================================================
 %%% Internal functions

@@ -53,7 +53,9 @@ attribute({_, Attributes, _}, Attribute) ->
     case lists:keyfind(Attribute, 1, Attributes) of
         false -> {error, {not_found, Attribute}};
         {_, Matched} -> {ok, Matched}
-    end.
+    end;
+attribute({_, _}, Attribute) ->
+    {error, {not_found, Attribute}}.
 
 -spec index(index(), html()) -> {ok, html_node()} | not_found(index()).
 index(Index, #{by_indices := ByIndices}) ->
