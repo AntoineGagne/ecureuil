@@ -1,6 +1,6 @@
 {application, ecureuil,
  [{description, "A HTML parser with support for searching with CSS selectors."},
-  {vsn, "1.0.1"},
+  {vsn, "1.0.2"},
   {registered, []},
   {applications,
    [kernel,
