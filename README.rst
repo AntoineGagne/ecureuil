@@ -33,7 +33,7 @@ To install this library, simply add the following lines to your
 
 .. code-block:: erlang
 
-    {ecureuil, "1.0.1"}
+    {ecureuil, "1.0.2"}
 
 Development
 ===========
